@@ -8,11 +8,18 @@ import time
 import argparse
 
 ### SET CONFIG HERE ###
-compiler = ""
-compiler_flags = ["-std=c++11", "-I./include"]
-linker_flags = ["-L./lib", "-lraylib", "-lopengl32", "-lgdi32", "-lwinmm"]
-executable_name = "game"
+compiler = "gcc"
+compiler_flags = ["-I./include"]
+linker_flags = ["-L./lib"]
+executable_name = "program"
 #######################
+
+# ### EXAMPLE CONFIG ###
+# compiler = "gcc"
+# compiler_flags = ["-std=c++11", "-I./include"]
+# linker_flags = ["-L./lib", "-lraylib", "-lopengl32", "-lgdi32", "-lwinmm"]
+# executable_name = "game"
+# #######################
 
 if sys.platform == "win32":
     executable_name += ".exe"
@@ -76,8 +83,8 @@ def compile_file(file, cache, progress):
         cache[file] = get_file_hash(file)
 
 def compile_files(src_files, header_files, cache):
-    total_files = len(src_files)
-    for index, file in enumerate(src_files, start=1):
+    total_files = len(src_files) + len(header_files)
+    for index, file in enumerate(src_files + header_files, start=1):
         progress = (index / total_files) * 100
         compile_file(file, cache, progress)
 
@@ -87,7 +94,9 @@ def link_files(obj_files):
 
 def clean_build():
     shutil.rmtree(build_dir, ignore_errors=True)
-    print("build directory cleaned.")
+    if os.path.exists(executable_name):
+        os.remove(executable_name)
+    print("build directory and executable cleaned.")
 
 def run_executable():
     executable_path = os.path.abspath(executable_name)
@@ -97,17 +106,20 @@ def run_executable():
 def main():
     print("--- make.py ---")
     parser = argparse.ArgumentParser(description="build script")
-    parser.add_argument("action", choices=["build", "run", "clean"], help="action to perform")
+    parser.add_argument("action", nargs="?", default="build", choices=["build", "b", "run", "r", "clean", "c", "rebuild", "rb"], help="action to perform (default: build)")
     args = parser.parse_args()
 
-    if args.action == "clean":
+    if args.action in ["clean", "c"]:
         clean_build()
         return
 
     check_compiler()
     cache = load_cache()
 
-    if args.action == "build" or args.action == "run":
+    if args.action in ["build", "b", "run", "r", "rebuild", "rb"]:
+        if args.action in ["rebuild", "rb"]:
+            clean_build()
+
         start_time = time.time()
         compile_files(src_files, header_files, cache)
         obj_files = [os.path.join(build_dir, file.replace(os.path.splitext(file)[1], ".o")) for file in src_files]
@@ -126,7 +138,7 @@ def main():
 
         save_cache(cache)
 
-        if args.action == "run":
+        if args.action in ["run", "r"]:
             run_executable()
 
 if __name__ == "__main__":
