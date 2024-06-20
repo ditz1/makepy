@@ -1,15 +1,15 @@
 ### file directory
-you must have your file directory in this format
-/workspace
-\
- | - src
- |   \ - main.c
- | - include
- |   \ - header.h 
- | - lib
- |   \ - lib.a
- |
- | - make.py
+you must have your file directory in this format <br />
+/workspace <br />
+\ <br />
+ | - src <br />
+ |   \ - main.c <br />
+ | - include <br />
+ |   \ - header.h <br />
+ | - lib <br />
+ |   \ - lib.a <br />
+ | <br />
+ | - make.py <br />
 
 ### build
 ```
